@@ -2,20 +2,27 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import PublicLayout from '../components/PublicLayout';
 
+import { fetchGallery } from '../services/apiService';
+import { GalleryItem } from '../types';
+
 const GalleryPage: React.FC = () => {
     const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
+    const [galleryItems, setGalleryItems] = React.useState<GalleryItem[]>([]);
 
-    const images = [
-        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1544531586-fde5298cdd40?q=80&w=2070&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1596496181961-d748f52af8ee?q=80&w=1974&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1588072432836-e10032774350?q=80&w=1772&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1564981797816-1043664bf78d?q=80&w=1974&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?q=80&w=1770&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1832&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?q=80&w=1770&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1510531704581-5b2870972060?q=80&w=1773&auto=format&fit=crop",
-    ];
+    React.useEffect(() => {
+        const loadGallery = async () => {
+            try {
+                const data = await fetchGallery();
+                setGalleryItems(data);
+            } catch (error) {
+                console.error("Failed to load gallery", error);
+            }
+        };
+        loadGallery();
+    }, []);
+
+    // Helper: list of images for lightbox
+    const images = galleryItems.map(item => item.imageUrl);
 
     const handleNext = (e?: React.MouseEvent) => {
         e?.stopPropagation();

@@ -47,6 +47,8 @@ app.use('/api/payments', require('./routes/payments.js'));
 app.use('/api/classes', require('./routes/classes.js'));
 app.use('/api/class-levels', require('./routes/classLevels.js'));
 app.use('/api/upload', require('./routes/upload.js'));
+app.use('/api/applications', require('./routes/applications.js'));
+app.use('/api/content', require('./routes/content.js'));
 
 // Basic route for testing server
 app.get('/', (req, res) => {

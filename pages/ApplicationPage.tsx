@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Send, User, Users, BookOpen, Upload } from 'lucide-react';
 import PublicLayout from '../components/PublicLayout';
+import { submitApplication } from '../services/apiService';
 
 const ApplicationPage: React.FC = () => {
     const [formData, setFormData] = useState({
@@ -18,16 +19,84 @@ const ApplicationPage: React.FC = () => {
         prevSchool: '',
         medicalInfo: ''
     });
+    // State for files
+    const [passport, setPassport] = useState<File | null>(null);
+    const [documents, setDocuments] = useState<File[]>([]);
+
+    // UI State
+    const [loading, setLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        alert("Application Submitted Successfully! (Mock)");
-        console.log(formData);
+    const handlePassportChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            setPassport(e.target.files[0]);
+        }
     };
+
+    const handleDocumentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files) {
+            // Convert FileList to Array
+            setDocuments(Array.from(e.target.files));
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        try {
+            const data = new FormData();
+            // Append Text Fields
+            Object.keys(formData).forEach(key => {
+                data.append(key, (formData as any)[key]);
+            });
+
+            // Append Files
+            if (passport) {
+                data.append('passport', passport);
+            }
+            // Append Documents (Multer handles multiple with same fieldname)
+            documents.forEach((doc) => {
+                data.append('documents', doc);
+            });
+
+            await submitApplication(data);
+            setSuccess(true);
+            // Optional: reset form here
+        } catch (err: any) {
+            console.error(err);
+            setError(err.message || "Failed to submit application.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (success) {
+        return (
+            <PublicLayout transparentNavbar={false}>
+                <section className="py-20 bg-gray-50 min-h-screen flex items-center justify-center">
+                    <div className="bg-white p-12 rounded-lg shadow-xl text-center max-w-lg">
+                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Send className="w-10 h-10 text-green-600" />
+                        </div>
+                        <h2 className="text-3xl font-bold text-gray-900 mb-4">Application Received!</h2>
+                        <p className="text-gray-600 mb-8">
+                            Thank you for applying to COCIN Danbong. We have received your details and will contact you shortly via email regarding the next steps.
+                        </p>
+                        <button onClick={() => window.location.reload()} className="text-blue-600 hover:text-blue-800 font-semibold">
+                            Submit Another Application
+                        </button>
+                    </div>
+                </section>
+            </PublicLayout>
+        );
+    }
 
     return (
         <PublicLayout transparentNavbar={false}>
@@ -51,6 +120,12 @@ const ApplicationPage: React.FC = () => {
             <section className="py-16 bg-gray-50">
                 <div className="container mx-auto px-6 max-w-4xl">
                     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-xl p-8 md:p-12">
+
+                        {error && (
+                            <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700">
+                                {error}
+                            </div>
+                        )}
 
                         {/* Student Details */}
                         <div className="mb-12">
@@ -106,11 +181,11 @@ const ApplicationPage: React.FC = () => {
                                     <label className="block text-gray-700 text-sm font-bold mb-2">Grade Applying For</label>
                                     <select name="grade" required className="w-full px-4 py-3 rounded border border-gray-300 focus:border-yellow-500 focus:ring-2 focus:ring-yellow-200 outline-none transition-all" onChange={handleChange}>
                                         <option value="">Select Grade</option>
-                                        <option value="7">Grade 7 (JSS 1)</option>
-                                        <option value="8">Grade 8 (JSS 2)</option>
-                                        <option value="9">Grade 9 (JSS 3)</option>
-                                        <option value="10">Grade 10 (SSS 1)</option>
-                                        <option value="11">Grade 11 (SSS 2)</option>
+                                        <option value="JSS 1">Grade 7 (JSS 1)</option>
+                                        <option value="JSS 2">Grade 8 (JSS 2)</option>
+                                        <option value="JSS 3">Grade 9 (JSS 3)</option>
+                                        <option value="SSS 1">Grade 10 (SSS 1)</option>
+                                        <option value="SSS 2">Grade 11 (SSS 2)</option>
                                     </select>
                                 </div>
                             </div>
@@ -194,17 +269,61 @@ const ApplicationPage: React.FC = () => {
                             </div>
                         </div>
 
-                        {/* Documents Placeholder */}
+                        {/* Documents */}
                         <div className="mb-12">
                             <h3 className="text-xl font-bold text-blue-900 mb-6 flex items-center gap-2 font-heading">
                                 <Upload className="w-6 h-6 text-yellow-500" />
                                 Documents Upload
                             </h3>
-                            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 hover:bg-white hover:border-yellow-500 transition-all cursor-pointer">
-                                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                                <p className="text-gray-600 font-medium">Click to upload Passport Photo & Report Cards</p>
-                                <p className="text-sm text-gray-500 mt-2">Maximum file size: 5MB (JPG, PDF)</p>
+
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {/* Passport Photo */}
+                                <div>
+                                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                                        Passport Photo <span className="text-red-500">*</span>
+                                    </label>
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-yellow-500 transition-colors bg-gray-50">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handlePassportChange}
+                                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                            required
+                                        />
+                                        <p className="text-xs text-gray-500 mt-2">Required. JPG/PNG only. Max 5MB.</p>
+                                    </div>
+                                </div>
+
+                                {/* Supporting Documents */}
+                                <div>
+                                    <label className="block text-gray-700 text-sm font-bold mb-2">
+                                        Supporting Documents
+                                    </label>
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 hover:border-yellow-500 transition-colors bg-gray-50">
+                                        <input
+                                            type="file"
+                                            multiple
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                            onChange={handleDocumentsChange}
+                                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                        />
+                                        <p className="text-xs text-gray-500 mt-2">Birth Certificate, Previous Results, etc. (Can select multiple)</p>
+                                    </div>
+                                </div>
                             </div>
+
+                            {/* File List Preview */}
+                            {(passport || documents.length > 0) && (
+                                <div className="mt-4 bg-gray-100 p-4 rounded text-sm text-gray-700">
+                                    <p className="font-bold mb-2">Selected Files:</p>
+                                    <ul className="list-disc pl-5">
+                                        {passport && <li>Passport: {passport.name}</li>}
+                                        {documents.map((doc, idx) => (
+                                            <li key={idx}>Doc: {doc.name}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
 
 
@@ -212,10 +331,17 @@ const ApplicationPage: React.FC = () => {
                         <div className="text-center">
                             <button
                                 type="submit"
-                                className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-12 rounded shadow-lg transform hover:-translate-y-1 transition-all flex items-center gap-2 mx-auto uppercase tracking-wider"
+                                disabled={loading}
+                                className={`bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 px-12 rounded shadow-lg transform transition-all flex items-center gap-2 mx-auto uppercase tracking-wider ${loading ? 'opacity-70 cursor-not-allowed' : 'hover:-translate-y-1'}`}
                             >
-                                <Send className="w-5 h-5" />
-                                Submit Application
+                                {loading ? (
+                                    <span>Submitting...</span>
+                                ) : (
+                                    <>
+                                        <Send className="w-5 h-5" />
+                                        Submit Application
+                                    </>
+                                )}
                             </button>
                             <p className="mt-4 text-sm text-gray-500">
                                 By clicking submit, you agree to our terms and admission policies.
@@ -228,5 +354,6 @@ const ApplicationPage: React.FC = () => {
         </PublicLayout>
     );
 };
+
 
 export default ApplicationPage;

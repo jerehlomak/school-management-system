@@ -5,6 +5,9 @@ import PublicLayout from '../components/PublicLayout';
 import HeroCarousel from '../components/HeroCarousel';
 import TestimonialSlider from '../components/TestimonialSlider';
 
+import { fetchNews } from '../services/apiService';
+import { NewsItem } from '../types';
+
 const SchoolLandingPage: React.FC = () => {
     // Shared animation variants
     const fadeIn = {
@@ -16,6 +19,19 @@ const SchoolLandingPage: React.FC = () => {
         hidden: { opacity: 0 },
         visible: { opacity: 1, transition: { staggerChildren: 0.2 } }
     };
+
+    // State for dynamic content
+    const [news, setNews] = React.useState<NewsItem[]>([]);
+
+    React.useEffect(() => {
+        const loadContent = async () => {
+            try {
+                const newsData = await fetchNews();
+                setNews(newsData.slice(0, 3)); // Show top 3
+            } catch (e) { console.error(e); }
+        };
+        loadContent();
+    }, []);
 
     return (
         <PublicLayout transparentNavbar={true}>
@@ -136,32 +152,30 @@ const SchoolLandingPage: React.FC = () => {
                     </div>
 
                     <div className="grid md:grid-cols-3 gap-8">
-                        {[
-                            { date: "15 Jan", title: "Professor Albert won the Researcher of the Year", img: "https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1770&auto=format&fit=crop" },
-                            { date: "22 Jan", title: "COCIN Danbong Basketball Team Finals", img: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1949&auto=format&fit=crop" },
-                            { date: "05 Feb", title: "Guest Lecture: Future of AI", img: "https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?q=80&w=1949&auto=format&fit=crop" }
-                        ].map((item, i) => (
+                        {news.length > 0 ? news.map((item, i) => (
                             <motion.div
-                                key={i}
+                                key={item._id}
                                 whileHover={{ y: -10 }}
                                 className="bg-white rounded-lg overflow-hidden shadow-lg group"
                             >
                                 <div className="h-48 overflow-hidden relative">
-                                    <img src={item.img} alt={item.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
+                                    <img src={item.image || 'https://via.placeholder.com/400x300'} alt={item.title} className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500" />
                                     <div className="absolute top-4 left-4 bg-yellow-500 text-white px-3 py-1 text-center rounded font-bold shadow">
-                                        <span className="block text-lg leading-tight">{item.date.split(' ')[0]}</span>
-                                        <span className="text-xs uppercase">{item.date.split(' ')[1]}</span>
+                                        <span className="block text-lg leading-tight">{new Date(item.date).getDate()}</span>
+                                        <span className="text-xs uppercase">{new Date(item.date).toLocaleString('default', { month: 'short' })}</span>
                                     </div>
                                 </div>
                                 <div className="p-6">
                                     <h3 className="text-lg font-bold mb-2 text-gray-800 group-hover:text-blue-900 transition-colors cursor-pointer">{item.title}</h3>
-                                    <p className="text-gray-500 text-sm mb-4">Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
-                                    <a href="#" className="flex items-center text-sm font-bold text-gray-400 hover:text-yellow-500 transition-colors">
+                                    <p className="text-gray-500 text-sm mb-4">{item.summary ? item.summary.substring(0, 100) : item.content.substring(0, 100)}...</p>
+                                    <a href="#/blog" className="flex items-center text-sm font-bold text-gray-400 hover:text-yellow-500 transition-colors">
                                         <Calendar className="w-4 h-4 mr-2" /> Read Article
                                     </a>
                                 </div>
                             </motion.div>
-                        ))}
+                        )) : (
+                            <p className="text-center col-span-3 text-gray-500">No news posted yet.</p>
+                        )}
                     </div>
                 </div>
             </section>

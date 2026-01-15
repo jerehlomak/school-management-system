@@ -59,6 +59,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user, isOpen, onClose }) => {
           { path: '/admin/manage-classes', label: 'Manage Classes', icon: School },
           { path: '/admin/fees', label: 'Fee Structure', icon: CreditCard },
           { path: '/admin/payments', label: 'Payments', icon: CreditCard },
+          { path: '/admin/applications', label: 'Applications', icon: FileText },
+          { path: '/admin/content', label: 'CMS (News/Gallery)', icon: FileText },
           // { path: '/admin/reports', label: 'Reports', icon: FileText },
         ];
       default:

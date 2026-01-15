@@ -1,5 +1,9 @@
-
-import { User, Course, StudentTermGrade, FeePayment, RRRInfo, PaymentStatus, UserRole, SchoolClass, ClassLevel, AddClassPayload, AddCoursePayload, AddClassLevelPayload } from '../types';
+import {
+  User, LoginCredentials, ApiResponse, PaginatedResponse,
+  Course, StudentTermGrade, FeePayment, RRRInfo, PaymentStatus, UserRole,
+  SchoolClass, ClassLevel, AddClassPayload, AddCoursePayload, AddClassLevelPayload,
+  PaginationMeta, Application, NewsItem, EventItem, GalleryItem
+} from '../types';
 import { generateUniqueAlphaNumericId, generateRandomPassword, generateStudentId } from '../constants'; // Keep utilities
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'; // Your backend API base URL
@@ -37,6 +41,57 @@ const apiCall = async (endpoint: string, method: string, data?: any) => {
 
   return response.json();
 };
+
+/* -------------------------------------------------------------------------- */
+/*                               APPLICATION                                  */
+/* -------------------------------------------------------------------------- */
+
+export const submitApplication = async (formData: FormData): Promise<Application> => {
+  const response = await fetch(`${BASE_URL}/applications`, {
+    method: 'POST',
+    body: formData,
+    // Do NOT set Content-Type header, browser sets it with boundary for FormData
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.message || 'Failed to submit application');
+  }
+  return response.json();
+};
+
+export const fetchApplications = async (): Promise<Application[]> => {
+  return apiCall('/applications', 'GET');
+};
+
+export const updateApplicationStatus = async (id: string, status: 'Approved' | 'Rejected' | 'Pending'): Promise<Application> => {
+  return apiCall(`/applications/${id}/status`, 'PATCH', { status });
+};
+
+/* -------------------------------------------------------------------------- */
+/*                                CONTENT CMS                                 */
+/* -------------------------------------------------------------------------- */
+
+// Generic helper for FormData submission
+const submitFormData = async (url: string, formData: FormData) => {
+  const response = await fetch(`${BASE_URL}${url}`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!response.ok) throw new Error('Failed to submit');
+  return response.json();
+};
+
+export const fetchNews = async (): Promise<NewsItem[]> => apiCall('/content/news', 'GET');
+export const createNews = async (data: FormData): Promise<NewsItem> => submitFormData('/content/news', data);
+export const deleteNews = async (id: string) => apiCall(`/content/news/${id}`, 'DELETE');
+
+export const fetchEvents = async (): Promise<EventItem[]> => apiCall('/content/events', 'GET');
+export const createEvent = async (data: FormData): Promise<EventItem> => submitFormData('/content/events', data);
+export const deleteEvent = async (id: string) => apiCall(`/content/events/${id}`, 'DELETE');
+
+export const fetchGallery = async (): Promise<GalleryItem[]> => apiCall('/content/gallery', 'GET');
+export const createGalleryItem = async (data: FormData): Promise<GalleryItem> => submitFormData('/content/gallery', data);
+export const deleteGalleryItem = async (id: string) => apiCall(`/content/gallery/${id}`, 'DELETE');
 
 
 

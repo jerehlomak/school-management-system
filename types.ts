@@ -146,3 +146,54 @@ export interface PaginatedResponse<T> {
   data: T[];
   pagination: PaginationMeta;
 }
+
+export interface Application {
+  id: string; // Mongoose _id
+  firstName: string;
+  lastName: string;
+  middleName?: string;
+  dateOfBirth: string;
+  gender: 'Male' | 'Female';
+  grade: string;
+  parentName: string;
+  parentEmail: string;
+  parentPhone: string;
+  address: string;
+  prevSchool?: string;
+  medicalInfo?: string;
+  passportUrl?: string; // URL to uploaded image
+  documentUrls?: string[]; // URLs to uploaded documents
+  status: 'Pending' | 'Approved' | 'Rejected';
+  submissionDate: string;
+}
+
+export interface NewsItem {
+  _id: string;
+  title: string;
+  content: string;
+  summary?: string;
+  author: string;
+  image?: string;
+  category: string;
+  date: string;
+  tags?: string[];
+}
+
+export interface EventItem {
+  _id: string;
+  title: string;
+  description: string;
+  date: string;
+  time: string;
+  location: string;
+  image?: string;
+  createdAt: string;
+}
+
+export interface GalleryItem {
+  _id: string;
+  title?: string;
+  category: string;
+  imageUrl: string;
+  date: string;
+}
