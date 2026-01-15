@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import Button from './Button';
 import { generateRemitaRRR, addPayment, updatePaymentStatus } from '../services/apiService';
-import { Payment, PaymentStatus, User } from '../types';
+import { FeePayment, PaymentStatus, User } from '../types';
 import Modal from './Modal';
 
 interface RemitaPaymentFormProps {
   student: User;
-  onPaymentSuccess: (payment: Payment) => void;
+  onPaymentSuccess: (payment: FeePayment) => void;
 }
 
 const RemitaPaymentForm: React.FC<RemitaPaymentFormProps> = ({ student, onPaymentSuccess }) => {
@@ -17,7 +17,7 @@ const RemitaPaymentForm: React.FC<RemitaPaymentFormProps> = ({ student, onPaymen
   const [error, setError] = useState<string | null>(null);
   const [rrrInfo, setRrrInfo] = useState<{ rrr: string; paymentLink: string; amount: number } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentMockPayment, setCurrentMockPayment] = useState<Payment | null>(null);
+  const [currentMockPayment, setCurrentMockPayment] = useState<FeePayment | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,10 +31,12 @@ const RemitaPaymentForm: React.FC<RemitaPaymentFormProps> = ({ student, onPaymen
     setLoading(true);
     try {
       // 1. Create a pending payment record
-      const newPayment: Omit<Payment, 'id'> = {
+      const newPayment: Omit<FeePayment, 'id'> = {
         studentId: student.id,
         amount: amount as number,
         description: description,
+        term: 1, // Default to term 1 for now if not selected
+        year: new Date().getFullYear(),
         date: new Date().toISOString().split('T')[0],
         status: PaymentStatus.Pending,
       };
@@ -130,13 +132,13 @@ const RemitaPaymentForm: React.FC<RemitaPaymentFormProps> = ({ student, onPaymen
         title="Remita Payment Details"
         size="sm"
         footer={
-            <Button
-              onClick={handleSimulatePaymentCompletion}
-              loading={loading}
-              variant="primary"
-            >
-              Simulate Payment Success
-            </Button>
+          <Button
+            onClick={handleSimulatePaymentCompletion}
+            loading={loading}
+            variant="primary"
+          >
+            Simulate Payment Success
+          </Button>
         }
       >
         {rrrInfo && (

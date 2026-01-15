@@ -79,12 +79,12 @@ const Sidebar: React.FC<SidebarProps> = ({ user, isOpen, onClose }) => {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 bg-gray-800 text-white shadow-lg z-40
+        className={`fixed inset-y-0 left-0 bg-blue-900 text-white shadow-lg z-40
           transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0
           transition-[width,transform] duration-300 ease-in-out md:relative
           ${isCollapsed ? 'w-20' : 'w-64'} flex flex-col`}
       >
-        <div className={`flex items-center h-16 px-4 bg-gray-900 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+        <div className={`flex items-center h-16 px-4 bg-blue-950 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
           {!isCollapsed && (
             <h2 className="text-xl font-bold text-blue-300 whitespace-nowrap overflow-hidden">Navigation</h2>
           )}
@@ -117,8 +117,8 @@ const Sidebar: React.FC<SidebarProps> = ({ user, isOpen, onClose }) => {
                     onClick={onClose}
                     className={`flex items-center px-4 py-3 rounded-lg transition-all duration-200 group relative
                       ${isActive
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                        ? 'bg-yellow-500 text-blue-900 shadow-md font-bold'
+                        : 'text-blue-200 hover:bg-blue-800 hover:text-white'
                       }
                       ${isCollapsed ? 'justify-center' : ''}
                     `}

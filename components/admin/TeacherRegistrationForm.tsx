@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Course, ClassLevel } from '../../types';
-import { registerTeacher } from '../../services/apiService';
+import { registerTeacher, uploadImage } from '../../services/apiService';
 import Button from '../Button';
 
 interface TeacherRegistrationFormProps {
@@ -13,6 +13,7 @@ interface TeacherRegistrationFormProps {
 const TeacherRegistrationForm: React.FC<TeacherRegistrationFormProps> = ({ courses, classLevels, onSuccess, onError }) => {
     const [teacherName, setTeacherName] = useState('');
     const [teacherEmail, setTeacherEmail] = useState('');
+    const [teacherImageFile, setTeacherImageFile] = useState<File | null>(null);
     const [teacherPhoneNumber, setTeacherPhoneNumber] = useState('');
     const [selectedSubjectsTaught, setSelectedSubjectsTaught] = useState<string[]>([]);
     const [selectedClassLevelsTaught, setSelectedClassLevelsTaught] = useState<string[]>([]);
@@ -31,16 +32,23 @@ const TeacherRegistrationForm: React.FC<TeacherRegistrationFormProps> = ({ cours
         }
 
         try {
+            let imageUrl = '';
+            if (teacherImageFile) {
+                imageUrl = await uploadImage(teacherImageFile);
+            }
+
             const { user: newTeacher, password: teacherPassword } = await registerTeacher(
                 teacherName,
                 teacherEmail,
                 selectedSubjectsTaught,
                 selectedClassLevelsTaught,
-                teacherPhoneNumber
+                teacherPhoneNumber,
+                imageUrl
             );
             setNewCredentials({ id: newTeacher.id, password: teacherPassword });
             setTeacherName('');
             setTeacherEmail('');
+            setTeacherImageFile(null);
             setTeacherPhoneNumber('');
             setSelectedSubjectsTaught([]);
             setSelectedClassLevelsTaught([]);
@@ -62,6 +70,16 @@ const TeacherRegistrationForm: React.FC<TeacherRegistrationFormProps> = ({ cours
             <div>
                 <label htmlFor="teacher-email" className="block text-sm font-medium text-gray-700">Email</label>
                 <input type="email" id="teacher-email" value={teacherEmail} onChange={(e) => setTeacherEmail(e.target.value)} required className="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
+            </div>
+            <div>
+                <label htmlFor="teacher-image" className="block text-sm font-medium text-gray-700">Profile Image (Optional)</label>
+                <input
+                    type="file"
+                    id="teacher-image"
+                    accept="image/*"
+                    onChange={(e) => setTeacherImageFile(e.target.files ? e.target.files[0] : null)}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
             </div>
             <div>
                 <label htmlFor="teacher-phone" className="block text-sm font-medium text-gray-700">Phone Number</label>

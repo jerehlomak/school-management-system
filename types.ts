@@ -21,8 +21,10 @@ export interface User {
   password?: string; // Should not be sent from backend, but for mock login/admin display.
   name: string;
   role: UserRole;
+
   email: string;
   phoneNumber?: string; // New: For parents and teachers, also used for student passwords
+  profileImage?: string; // URL to profile image
   parentId?: string; // For students, links to parent
   studentIds?: string[]; // For parents, links to students
   classId?: string; // For students, link to their segmented class (e.g., 'JSS1A')
@@ -65,7 +67,7 @@ export interface SchoolClass {
   studentsIds: string[];
   capacity: number;
   coreSubjects?: string[]; // Array of Course IDs for core subjects
-  optionalSubjects?: { groupName: string; options: string[] }[]; // Array of optional subject groups
+  optionalSubjects?: { groupName: string; options: string[]; minSelection?: number; maxSelection?: number }[]; // Array of optional subject groups
 }
 
 export interface AddClassPayload {
@@ -119,6 +121,9 @@ export interface FeePayment {
   status: PaymentStatus;
   rrr?: string;
   paymentLink?: string;
+  studentName?: string; // Optional: Enriched in frontend or joined in backend
+  classId?: string; // Optional: Enriched
+  paymentReference?: string;
 }
 
 export interface RRRInfo {

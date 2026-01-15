@@ -11,6 +11,7 @@ const MONGODB_URI = process.env.MONGODB_URI;
 // Middleware
 app.use(cors());
 app.use(express.json()); // For parsing application/json
+app.use('/uploads', express.static('uploads')); // Serve uploaded files statically
 
 // Import models for initial data population
 const User = require('./models/User.js');
@@ -45,6 +46,7 @@ app.use('/api/fees', require('./routes/fees.js'));
 app.use('/api/payments', require('./routes/payments.js'));
 app.use('/api/classes', require('./routes/classes.js'));
 app.use('/api/class-levels', require('./routes/classLevels.js'));
+app.use('/api/upload', require('./routes/upload.js'));
 
 // Basic route for testing server
 app.get('/', (req, res) => {

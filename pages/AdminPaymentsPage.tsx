@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { FeePayment, UserRole, SchoolClass } from '../types';
 import { fetchAllPayments, fetchClasses } from '../services/apiService';
 import PaymentDetailModal from '../components/PaymentDetailModal';
+import Table from '../components/Table';
 import Button from '../components/Button';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -146,54 +147,41 @@ const AdminPaymentsPage: React.FC = () => {
             <div className="bg-white rounded-lg shadowoverflow-hidden border border-gray-200">
                 {loading ? (
                     <div className="p-10"><LoadingSpinner /></div>
-                ) : payments.length === 0 ? (
-                    <div className="p-10 text-center text-gray-500">No payment records found.</div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
-                                <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Class</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                                {payments.map((payment) => (
-                                    <tr key={payment.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => handleViewDetails(payment)}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {new Date(payment.date).toLocaleDateString()}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {payment.studentName || 'Unknown'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {payment.classId || 'N/A'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
-                                            {formatCurrency(payment.amount)}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${payment.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                                                payment.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-red-100 text-red-800'
-                                                }`}>
-                                                {payment.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-blue-600">
-                                            <button onClick={(e) => { e.stopPropagation(); handleViewDetails(payment); }} className="hover:underline">
-                                                View Receipt
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    <Table<FeePayment>
+                        data={payments}
+                        rowKey="id"
+                        itemsPerPage={2} // Lowered to 2 for visibility with small data
+                        emptyMessage="No payment records found."
+                        columns={[
+                            { header: 'Date', accessor: (p) => new Date(p.date).toLocaleDateString() },
+                            { header: 'Student', accessor: 'studentName' },
+                            { header: 'Class', accessor: (p) => p.classId || 'N/A' },
+                            { header: 'Amount', accessor: (p) => <span className="font-semibold">{formatCurrency(p.amount)}</span> },
+                            {
+                                header: 'Status',
+                                accessor: (p) => (
+                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${p.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                        p.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-red-100 text-red-800'
+                                        }`}>
+                                        {p.status}
+                                    </span>
+                                )
+                            },
+                            {
+                                header: 'Action',
+                                accessor: (p) => (
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleViewDetails(p); }}
+                                        className="text-blue-600 hover:underline text-sm"
+                                    >
+                                        View Receipt
+                                    </button>
+                                )
+                            }
+                        ]}
+                    />
                 )}
             </div>
 

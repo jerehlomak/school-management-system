@@ -84,7 +84,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
           </Button>
         </form>
 
-        <div className="mt-8 text-center text-gray-500 text-sm">
+        {/* <div className="mt-8 text-center text-gray-500 text-sm">
           <p className="mb-2">Hint: Default users (if DB is empty or just populated):</p>
           <ul className="text-left mx-auto max-w-xs space-y-1">
             <li><span className="font-semibold">Student:</span> `student_JSS_001_2023` (or any generated ID), password `08011111111`</li>
@@ -93,7 +93,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
             <li><span className="font-semibold">Admin:</span> `admin1` or `a001`, password `password`</li>
           </ul>
           <p className="mt-4 text-xs">Note: After registering new users, use their generated IDs/usernames/phone numbers (where applicable) and their assigned passwords.</p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

@@ -38,6 +38,29 @@ const apiCall = async (endpoint: string, method: string, data?: any) => {
   return response.json();
 };
 
+
+
+/**
+ * Uploads an image file to the backend and returns the URL.
+ */
+export const uploadImage = async (file: File): Promise<string> => {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const response = await fetch(`${BASE_URL}/upload`, {
+    method: 'POST',
+    body: formData,
+    // Note: Do not set Content-Type header manually; fetch does it for FormData
+  });
+
+  if (!response.ok) {
+    throw new Error('Image upload failed');
+  }
+
+  const data = await response.json();
+  return data.url;
+};
+
 /**
  * Simulates fetching user data from a backend.
  * Allows login using username, student ID, or phone number (for teachers/parents).
@@ -268,7 +291,9 @@ export const registerStudent = async (
   classId: string,
   subjectsEnrolled: string[],
   admissionYear: number,
+
   parentId: string,
+  profileImage?: string,
 ): Promise<{ user: User; password: string }> => {
   // The backend will handle student ID generation, password setting (from parent's phone),
   // and linking the student's phone number.
@@ -279,6 +304,7 @@ export const registerStudent = async (
     subjectsEnrolled,
     admissionYear,
     parentId,
+    profileImage,
   });
 };
 
@@ -291,6 +317,7 @@ export const registerTeacher = async (
   subjectsTaught: string[],
   classLevelsTaught: string[],
   phoneNumber: string,
+  profileImage?: string,
 ): Promise<{ user: User; password: string }> => {
   return apiCall('/users/register-teacher', 'POST', {
     teacherName,
@@ -298,6 +325,7 @@ export const registerTeacher = async (
     subjectsTaught,
     classLevelsTaught,
     phoneNumber,
+    profileImage,
   });
 };
 
@@ -309,12 +337,14 @@ export const registerParent = async (
   email: string,
   phoneNumber: string,
   studentIdsToLink?: string[],
+  profileImage?: string,
 ): Promise<{ user: User; password: string }> => {
   return apiCall('/users/register-parent', 'POST', {
     parentName,
     email,
     phoneNumber,
     studentIdsToLink,
+    profileImage,
   });
 };
 

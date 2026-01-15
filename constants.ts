@@ -1,5 +1,5 @@
 
-import { User, UserRole, Course, StudentTermGrade, Payment, PaymentStatus, SchoolClass, ClassLevel } from './types';
+import { User, UserRole, Course, StudentTermGrade, PaymentStatus, SchoolClass, ClassLevel } from './types';
 
 // Helper for generating unique alphanumeric IDs
 // export const generateUniqueAlphaNumericId = (prefix: string, existingIds: string[]): string => {
@@ -81,48 +81,48 @@ export const MOCK_CLASSES: SchoolClass[] = [
     id: 'cl001A', name: 'JSS1A', classLevelId: 'jl001',
     coreSubjects: ['c001', 'c002', 'c003', 'c005', 'c006', 'c007', 'c009', 'c010'],
     optionalSubjects: [
-      { group: 'Languages', options: ['c004', 'c011', 'c012'], minSelection: 1, maxSelection: 1 },
-      { group: 'Vocational', options: ['c008'], minSelection: 0, maxSelection: 1 },
+      { groupName: 'Languages', options: ['c004', 'c011', 'c012'], minSelection: 1, maxSelection: 1 },
+      { groupName: 'Vocational', options: ['c008'], minSelection: 0, maxSelection: 1 },
     ],
   },
   {
     id: 'cl001B', name: 'JSS1B', classLevelId: 'jl001',
     coreSubjects: ['c001', 'c002', 'c003', 'c005', 'c006', 'c007', 'c009', 'c010'],
     optionalSubjects: [
-      { group: 'Languages', options: ['c004', 'c011', 'c012'], minSelection: 1, maxSelection: 1 },
-      { group: 'Vocational', options: ['c008'], minSelection: 0, maxSelection: 1 },
+      { groupName: 'Languages', options: ['c004', 'c011', 'c012'], minSelection: 1, maxSelection: 1 },
+      { groupName: 'Vocational', options: ['c008'], minSelection: 0, maxSelection: 1 },
     ],
   },
   {
     id: 'cl001C', name: 'JSS1C', classLevelId: 'jl001',
     coreSubjects: ['c001', 'c002', 'c003', 'c005', 'c006', 'c007', 'c009', 'c010'],
     optionalSubjects: [
-      { group: 'Languages', options: ['c004', 'c011', 'c012'], minSelection: 1, maxSelection: 1 },
-      { group: 'Vocational', options: ['c008'], minSelection: 0, maxSelection: 1 },
+      { groupName: 'Languages', options: ['c004', 'c011', 'c012'], minSelection: 1, maxSelection: 1 },
+      { groupName: 'Vocational', options: ['c008'], minSelection: 0, maxSelection: 1 },
     ],
   },
   {
     id: 'cl002A', name: 'JSS2A', classLevelId: 'jl002',
     coreSubjects: ['c001', 'c002', 'c003', 'c005', 'c006', 'c007', 'c009', 'c010'],
     optionalSubjects: [
-      { group: 'Languages', options: ['c004', 'c011', 'c012'], minSelection: 1, maxSelection: 1 },
-      { group: 'Vocational', options: ['c008'], minSelection: 0, maxSelection: 1 },
+      { groupName: 'Languages', options: ['c004', 'c011', 'c012'], minSelection: 1, maxSelection: 1 },
+      { groupName: 'Vocational', options: ['c008'], minSelection: 0, maxSelection: 1 },
     ],
   },
   {
     id: 'cl003A', name: 'JSS3A', classLevelId: 'jl003',
     coreSubjects: ['c001', 'c002', 'c003', 'c005', 'c006', 'c007', 'c009', 'c010'],
     optionalSubjects: [
-      { group: 'Languages', options: ['c004', 'c011', 'c012'], minSelection: 1, maxSelection: 1 },
-      { group: 'Vocational', options: ['c008'], minSelection: 0, maxSelection: 1 },
+      { groupName: 'Languages', options: ['c004', 'c011', 'c012'], minSelection: 1, maxSelection: 1 },
+      { groupName: 'Vocational', options: ['c008'], minSelection: 0, maxSelection: 1 },
     ],
   },
   {
     id: 'cl004A', name: 'SSS1A', classLevelId: 'sl001',
     coreSubjects: ['c001', 'c002', 'c003', 'c005', 'c006', 'c007', 'c009'], // Example core for SSS
     optionalSubjects: [
-      { group: 'Science', options: ['c010'], minSelection: 0, maxSelection: 1 }, // Home Management as optional science
-      { group: 'Languages', options: ['c004', 'c011', 'c012'], minSelection: 0, maxSelection: 1 },
+      { groupName: 'Science', options: ['c010'], minSelection: 0, maxSelection: 1 }, // Home Management as optional science
+      { groupName: 'Languages', options: ['c004', 'c011', 'c012'], minSelection: 0, maxSelection: 1 },
     ],
   },
   // Add more classes (JSS2B, JSS2C, SSS1B, etc.) following the pattern
@@ -152,7 +152,7 @@ export const getGradeAndRemark = (score: number | undefined): { grade: string; r
 };
 
 
-export const APP_NAME = "Edves Portal";
+export const APP_NAME = "COCIN Danbong";
 
 // Mock school details for report card
 export const MOCK_SCHOOL_DETAILS = {

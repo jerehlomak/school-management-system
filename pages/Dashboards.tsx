@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, lazy, Suspense } from 'react';
-import { User, UserRole, StudentTermGrade, Course, Payment } from '../types';
+import { User, UserRole, StudentTermGrade, Course, FeePayment } from '../types';
 import { fetchStudentTermGrades, fetchCourses, fetchStudentPayments, fetchAllUsers, fetchClasses } from '../services/apiService';
 import LoadingSpinner from '../components/LoadingSpinner';
 
@@ -18,7 +18,7 @@ const CURRENT_YEAR = new Date().getFullYear();
 const Dashboards: React.FC<DashboardsProps> = ({ user }) => {
   const [studentGrades, setStudentGrades] = useState<StudentTermGrade[]>([]);
   const [studentCourses, setStudentCourses] = useState<Course[]>([]);
-  const [studentPayments, setStudentPayments] = useState<Payment[]>([]);
+  const [studentPayments, setStudentPayments] = useState<FeePayment[]>([]);
   const [teacherCourses, setTeacherCourses] = useState<Course[]>([]);
   const [teacherAllGrades, setTeacherAllGrades] = useState<StudentTermGrade[]>([]);
   const [parentStudents, setParentStudents] = useState<User[]>([]);

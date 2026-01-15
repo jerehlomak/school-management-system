@@ -25,7 +25,7 @@ const AdminLoginPage: React.FC<AdminLoginPageProps> = ({ onLoginSuccess }) => {
             // Strict check for Admin role
             if (user && user.role === UserRole.Admin) {
                 onLoginSuccess(user);
-                navigate('/'); // Redirect to dashboard/admin home
+                navigate('/dashboard'); // Redirect to dashboard/admin home
             } else if (user) {
                 setError('Access Denied: This portal is for Administrators only.');
             } else {

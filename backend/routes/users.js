@@ -153,6 +153,7 @@ router.post('/register-student', async (req, res) => {
       name: studentName,
       email,
       phoneNumber: parentUser.phoneNumber, // Student phone is parent's phone
+      profileImage: req.body.profileImage,
       role: 'student',
       classId,
       subjectsEnrolled,
@@ -205,6 +206,7 @@ router.post('/register-teacher', async (req, res) => {
       name: teacherName,
       email,
       phoneNumber,
+      profileImage: req.body.profileImage,
       role: 'teacher',
       subjectsTaught,
       classLevelsTaught,
@@ -252,6 +254,7 @@ router.post('/register-parent', async (req, res) => {
       name: parentName,
       email,
       phoneNumber,
+      profileImage: req.body.profileImage,
       role: 'parent',
       studentIds: studentIdsToLink || [],
     });

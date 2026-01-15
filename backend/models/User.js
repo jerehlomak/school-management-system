@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema({
   role: { type: String, enum: ['student', 'teacher', 'parent', 'admin'], required: true },
   email: { type: String, unique: true, required: true },
   phoneNumber: { type: String },
+  profileImage: { type: String }, // URL to profile image
   parentId: { type: String, ref: 'User', default: null }, // For students, links to parent User.id
   studentIds: [{ type: String, ref: 'User' }], // For parents, links to student User.id
   classId: { type: String, ref: 'SchoolClass' }, // For students, link to their segmented class (e.g., 'JSS1A')

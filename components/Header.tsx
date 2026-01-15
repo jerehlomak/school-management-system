@@ -25,15 +25,26 @@ const Header: React.FC<HeaderProps> = ({ user, onLogout, onToggleSidebar }) => {
             </svg>
           </button>
         )}
-        <h1 className="text-2xl font-bold text-blue-700">
-          {APP_NAME}
-        </h1>
+        <a href="/" className="hover:opacity-80 transition-opacity">
+          <h1 className="text-2xl font-bold text-blue-900 font-heading">
+            {APP_NAME}
+          </h1>
+        </a>
       </div>
       {user && (
         <div className="flex items-center space-x-4">
-          <span className="text-gray-700 font-medium hidden sm:block">
-            Welcome, {user.name} ({user.role})
-          </span>
+          <div className="flex items-center space-x-2">
+            {user.profileImage ? (
+              <img src={user.profileImage} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-gray-200" />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-lg">
+                {user.name.charAt(0)}
+              </div>
+            )}
+            <span className="text-gray-700 font-medium hidden sm:block">
+              {user.name} ({user.role})
+            </span>
+          </div>
           <Button onClick={onLogout} variant="secondary" size="sm">
             Logout
           </Button>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { User } from '../../types';
-import { registerParent } from '../../services/apiService';
+import { registerParent, uploadImage } from '../../services/apiService';
 import Button from '../Button';
 
 interface ParentRegistrationFormProps {
@@ -12,6 +12,7 @@ interface ParentRegistrationFormProps {
 const ParentRegistrationForm: React.FC<ParentRegistrationFormProps> = ({ studentsWithoutParents, onSuccess, onError }) => {
     const [parentName, setParentName] = useState('');
     const [parentEmail, setParentEmail] = useState('');
+    const [parentImageFile, setParentImageFile] = useState<File | null>(null);
     const [parentPhoneNumber, setParentPhoneNumber] = useState('');
     const [parentStudentsToLink, setParentStudentsToLink] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
@@ -29,15 +30,22 @@ const ParentRegistrationForm: React.FC<ParentRegistrationFormProps> = ({ student
         }
 
         try {
+            let imageUrl = '';
+            if (parentImageFile) {
+                imageUrl = await uploadImage(parentImageFile);
+            }
+
             const { user: newParent, password: parentPassword } = await registerParent(
                 parentName,
                 parentEmail,
                 parentPhoneNumber,
-                parentStudentsToLink.length > 0 ? parentStudentsToLink : undefined
+                parentStudentsToLink.length > 0 ? parentStudentsToLink : undefined,
+                imageUrl
             );
             setNewCredentials({ id: newParent.id, password: parentPassword });
             setParentName('');
             setParentEmail('');
+            setParentImageFile(null);
             setParentPhoneNumber('');
             setParentStudentsToLink([]);
             onSuccess();
@@ -58,6 +66,16 @@ const ParentRegistrationForm: React.FC<ParentRegistrationFormProps> = ({ student
             <div>
                 <label htmlFor="parent-email" className="block text-sm font-medium text-gray-700">Email</label>
                 <input type="email" id="parent-email" value={parentEmail} onChange={(e) => setParentEmail(e.target.value)} required className="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
+            </div>
+            <div>
+                <label htmlFor="parent-image" className="block text-sm font-medium text-gray-700">Profile Image (Optional)</label>
+                <input
+                    type="file"
+                    id="parent-image"
+                    accept="image/*"
+                    onChange={(e) => setParentImageFile(e.target.files ? e.target.files[0] : null)}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
             </div>
             <div>
                 <label htmlFor="parent-phone" className="block text-sm font-medium text-gray-700">Phone Number (Also used for student passwords)</label>

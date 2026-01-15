@@ -18,6 +18,27 @@ const ParentDashboardView: React.FC<ParentDashboardViewProps> = ({
     const totalChildren = parentStudents.length;
     const [outstandingFees, setOutstandingFees] = useState<number>(0);
     const [loadingFees, setLoadingFees] = useState<boolean>(true);
+    const [paymentHistory, setPaymentHistory] = useState<FeePayment[]>([]);
+
+    useEffect(() => {
+        const fetchHistory = async () => {
+            if (parentStudents.length === 0) return;
+            try {
+                // Fetch payments for all children and attach student info
+                const promises = parentStudents.map(async (child) => {
+                    const payments = await fetchStudentPayments(child.id);
+                    return payments.map(p => ({ ...p, studentName: child.name }));
+                });
+                const results = await Promise.all(promises);
+                // Flatten array
+                const allPayments = results.flat().sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+                setPaymentHistory(allPayments);
+            } catch (error) {
+                console.error("Failed to fetch parent payment history", error);
+            }
+        };
+        fetchHistory();
+    }, [parentStudents]);
 
     const CURRENT_TERM = 1; // Default to Term 1 for now, or could make dynamic later
     const CURRENT_YEAR = new Date().getFullYear();
@@ -102,7 +123,7 @@ const ParentDashboardView: React.FC<ParentDashboardViewProps> = ({
 
     return (
         <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Parent Dashboard</h2>
+            {/* <h2 className="text-3xl font-bold text-gray-900 mb-6">Parent Dashboard</h2> */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <DashboardCard
                     title="Children Enrolled"
@@ -133,7 +154,35 @@ const ParentDashboardView: React.FC<ParentDashboardViewProps> = ({
 
             <section>
                 <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Children</h3>
-                <Table data={parentStudents} columns={studentColumns} rowKey="id" emptyMessage="No children linked." />
+                <Table<User> data={parentStudents} columns={studentColumns} rowKey="id" emptyMessage="No children linked." />
+            </section>
+
+            <section>
+                <h3 className="text-2xl font-semibold text-gray-800 mb-4">Payment History</h3>
+                <Table<FeePayment>
+                    data={paymentHistory}
+                    rowKey="id"
+                    itemsPerPage={3} // As requested limit 3
+                    emptyMessage="No payment history available."
+                    columns={[
+                        { header: 'Date', accessor: (p) => new Date(p.date).toLocaleDateString() },
+                        { header: 'Child Name', accessor: 'studentName' },
+                        { header: 'Term', accessor: (p) => `Term ${p.term} (${p.year})` },
+                        { header: 'Amount', accessor: (p) => <span className="font-semibold text-gray-900">{new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(p.amount)}</span> },
+                        {
+                            header: 'Status',
+                            accessor: (p) => (
+                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${p.status === 'Completed' ? 'bg-green-100 text-green-800' :
+                                    p.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
+                                        'bg-red-100 text-red-800'
+                                    }`}>
+                                    {p.status}
+                                </span>
+                            )
+                        },
+                        { header: 'Reference', accessor: (p) => <span className="text-xs text-gray-500 font-mono">{p.paymentReference || 'N/A'}</span> },
+                    ]}
+                />
             </section>
         </div>
     );

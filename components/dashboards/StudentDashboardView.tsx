@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Course, StudentTermGrade, Payment, PaymentStatus } from '../../types';
+import { User, Course, StudentTermGrade, FeePayment, PaymentStatus } from '../../types';
 import DashboardCard from '../DashboardCard';
 import Table from '../Table';
 import { Link } from 'react-router-dom';
@@ -9,7 +9,7 @@ interface StudentDashboardViewProps {
     user: User;
     studentGrades: StudentTermGrade[];
     studentCourses: Course[];
-    studentPayments: Payment[];
+    studentPayments: FeePayment[];
     allFetchedCourses: Course[];
     allFetchedClasses: any[];
     allFetchedUsers: User[];
@@ -52,7 +52,7 @@ const StudentDashboardView: React.FC<StudentDashboardViewProps> = ({
 
     return (
         <div className="space-y-6">
-            <h2 className="text-3xl font-bold text-gray-900 mb-6">Student Dashboard</h2>
+            {/* <h2 className="text-3xl font-bold text-gray-900 mb-6">Student Dashboard</h2> */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <DashboardCard
                     title="Total Courses"
@@ -73,13 +73,27 @@ const StudentDashboardView: React.FC<StudentDashboardViewProps> = ({
 
             <section className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
                 <h3 className="text-2xl font-semibold text-gray-800 mb-4">My Information</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-700">
-                    <p><span className="font-semibold">Student ID:</span> {user.id}</p>
-                    <p><span className="font-semibold">Class:</span> {allFetchedClasses.find((cls: any) => cls.id === user.classId)?.name || 'N/A'}</p>
-                    <p><span className="font-semibold">Admission Year:</span> {user.admissionYear || 'N/A'}</p>
-                    <p><span className="font-semibold">Email:</span> {user.email}</p>
-                    <p><span className="font-semibold">Parent:</span> {allFetchedUsers.find(p => p.id === user.parentId)?.name || 'N/A'}</p>
-                    <p><span className="font-semibold">Phone:</span> {user.phoneNumber || 'N/A'}</p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-gray-700 items-start">
+                    {/* Grid 1: Profile Image */}
+                    <div className="flex justify-center md:justify-start">
+                        {user.profileImage ? (
+                            <img src={user.profileImage} alt={user.name} className="w-48 h-48 rounded-lg object-cover border-4 border-white shadow-lg" />
+                        ) : (
+                            <div className="w-48 h-48 rounded-lg bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-6xl shadow-lg">
+                                {user.name.charAt(0)}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Grid 2 & 3: Details */}
+                    <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <p><span className="font-semibold block text-gray-500 text-sm">Student ID</span> <span className="text-lg">{user.id}</span></p>
+                        <p><span className="font-semibold block text-gray-500 text-sm">Class</span> <span className="text-lg">{allFetchedClasses.find((cls: any) => cls.id === user.classId)?.name || 'N/A'}</span></p>
+                        <p><span className="font-semibold block text-gray-500 text-sm">Admission Year</span> <span className="text-lg">{user.admissionYear || 'N/A'}</span></p>
+                        <p><span className="font-semibold block text-gray-500 text-sm">Email</span> <span className="text-lg break-all">{user.email}</span></p>
+                        <p><span className="font-semibold block text-gray-500 text-sm">Parent</span> <span className="text-lg">{allFetchedUsers.find(p => p.id === user.parentId)?.name || 'N/A'}</span></p>
+                        <p><span className="font-semibold block text-gray-500 text-sm">Phone</span> <span className="text-lg">{user.phoneNumber || 'N/A'}</span></p>
+                    </div>
                 </div>
             </section>
 

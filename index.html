@@ -1,56 +1,83 @@
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edves Portal</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-      /* Optional: Custom scrollbar for better aesthetics */
-      ::-webkit-scrollbar {
-          width: 8px;
-          height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-          background: #f1f1f1;
-      }
-      ::-webkit-scrollbar-thumb {
-          background: #a8a8a8;
-          border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-          background: #7a7a7a;
-      }
-      /* Styles for printing (hide UI elements not part of the report) */
-      @media print {
-        .print-button-container,
-        .ai-assistant-container,
-        .sidebar,
-        .header {
-          display: none !important;
-        }
-        body {
-          margin: 0;
-          padding: 0;
-        }
-        #root {
-          width: 100vw !important;
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-        #report-card-content {
-          margin: 0 !important;
-          padding: 0 !important;
-          box-shadow: none !important;
-          border: none !important;
-          width: 100% !important;
-          max-width: none !important;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>COCIN Danbong</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap"
+    rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            heading: ['"Playfair Display"', 'serif'],
+          }
         }
       }
-    </style>
-<script type="importmap">
+    }
+  </script>
+  <style>
+    /* Optional: Custom scrollbar for better aesthetics */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #a8a8a8;
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #7a7a7a;
+    }
+
+    /* Styles for printing (hide UI elements not part of the report) */
+    @media print {
+
+      .print-button-container,
+      .ai-assistant-container,
+      .sidebar,
+      .header {
+        display: none !important;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      #root {
+        width: 100vw !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+
+      #report-card-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+        width: 100% !important;
+        max-width: none !important;
+      }
+    }
+  </style>
+  <script type="importmap">
 {
   "imports": {
     "react": "https://esm.sh/react@^19.2.3",
@@ -63,10 +90,12 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
+
 <body class="bg-gray-100 font-sans antialiased text-gray-800">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+  <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
 </body>
+
 </html>

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { User, Course, SchoolClass } from '../../types';
-import { registerStudent } from '../../services/apiService';
+import { registerStudent, uploadImage } from '../../services/apiService';
 import Button from '../Button';
 
 interface StudentRegistrationFormProps {
@@ -14,6 +14,7 @@ interface StudentRegistrationFormProps {
 const StudentRegistrationForm: React.FC<StudentRegistrationFormProps> = ({ classes, courses, parentsList, onSuccess, onError }) => {
     const [studentName, setStudentName] = useState('');
     const [studentEmail, setStudentEmail] = useState('');
+    const [studentImageFile, setStudentImageFile] = useState<File | null>(null);
     const [studentClassId, setStudentClassId] = useState('');
     const [studentAdmissionYear, setStudentAdmissionYear] = useState<number | ''>(new Date().getFullYear());
     const [selectedParentId, setSelectedParentId] = useState<string>('');
@@ -66,17 +67,24 @@ const StudentRegistrationForm: React.FC<StudentRegistrationFormProps> = ({ class
         }
 
         try {
+            let imageUrl = '';
+            if (studentImageFile) {
+                imageUrl = await uploadImage(studentImageFile);
+            }
+
             const { user: newStudent, password: studentPassword } = await registerStudent(
                 studentName,
                 studentEmail,
                 studentClassId,
                 allSubjectsEnrolled,
                 studentAdmissionYear as number,
-                selectedParentId
+                selectedParentId,
+                imageUrl
             );
             setNewCredentials({ id: newStudent.id, password: studentPassword });
             setStudentName('');
             setStudentEmail('');
+            setStudentImageFile(null);
             setStudentClassId('');
             setStudentAdmissionYear(new Date().getFullYear());
             setSelectedParentId('');
@@ -100,6 +108,16 @@ const StudentRegistrationForm: React.FC<StudentRegistrationFormProps> = ({ class
             <div>
                 <label htmlFor="student-email" className="block text-sm font-medium text-gray-700">Email</label>
                 <input type="email" id="student-email" value={studentEmail} onChange={(e) => setStudentEmail(e.target.value)} required className="mt-1 block w-full p-2 border border-gray-300 rounded-md" />
+            </div>
+            <div>
+                <label htmlFor="student-image" className="block text-sm font-medium text-gray-700">Profile Image (Optional)</label>
+                <input
+                    type="file"
+                    id="student-image"
+                    accept="image/*"
+                    onChange={(e) => setStudentImageFile(e.target.files ? e.target.files[0] : null)}
+                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md text-sm file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                />
             </div>
             <div>
                 <label htmlFor="student-admission-year" className="block text-sm font-medium text-gray-700">Admission Year</label>

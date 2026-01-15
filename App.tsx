@@ -24,6 +24,12 @@ const AdminPaymentsPage = lazy(() => import('./pages/AdminPaymentsPage'));
 const TeacherClassesPage = lazy(() => import('./pages/TeacherClassesPage'));
 const ParentResultsPage = lazy(() => import('./pages/ParentResultsPage'));
 const SchoolLandingPage = lazy(() => import('./pages/SchoolLandingPage'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const AdmissionsPage = lazy(() => import('./pages/AdmissionsPage'));
+const BlogPage = lazy(() => import('./pages/BlogPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const GalleryPage = lazy(() => import('./pages/GalleryPage'));
+const ApplicationPage = lazy(() => import('./pages/ApplicationPage'));
 
 // Simple Admin Route Protection
 const AdminRoute = ({ children }: { children: React.ReactElement }) => {
@@ -39,7 +45,7 @@ const AppContent: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const isPublicRoute = ['#/login', '#/admin-login', '#/forgot-password', '#/reset-password', '#/'].some(path => window.location.hash.startsWith(path));
+    const isPublicRoute = ['#/login', '#/admin-login', '#/forgot-password', '#/reset-password', '#/', '#/about', '#/admissions', '#/blog', '#/contact', '#/gallery', '#/apply'].some(path => window.location.hash.startsWith(path));
 
     if (currentUser) {
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -107,6 +113,12 @@ const AppContent: React.FC = () => {
   return (
     <Routes>
       <Route path="/" element={<SchoolLandingPage />} />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/admissions" element={<AdmissionsPage />} />
+      <Route path="/blog" element={<BlogPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/gallery" element={<GalleryPage />} />
+      <Route path="/apply" element={<ApplicationPage />} />
       <Route path="/login" element={<LoginPage onLoginSuccess={handleLoginSuccess} />} />
       <Route path="/admin-login" element={<AdminLoginPage onLoginSuccess={handleLoginSuccess} />} />
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
