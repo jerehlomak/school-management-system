@@ -1,0 +1,5 @@
+{
+  "name": "Edves Portal Clone",
+  "description": "A feature-rich, modern web application cloning the Edves student, teacher, parent, and admin portals with simulated Remita payment integration and AI assistance.",
+  "requestFramePermissions": []
+}
