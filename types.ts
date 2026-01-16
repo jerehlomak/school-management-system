@@ -197,3 +197,12 @@ export interface GalleryItem {
   imageUrl: string;
   date: string;
 }
+
+export interface TestimonialItem {
+  _id: string;
+  name: string;
+  role: string;
+  text: string;
+  image?: string;
+  createdAt: string;
+}

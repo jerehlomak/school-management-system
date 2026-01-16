@@ -1,5 +1,5 @@
 import {
-  User, LoginCredentials, ApiResponse, PaginatedResponse,
+  User, PaginatedResponse,
   Course, StudentTermGrade, FeePayment, RRRInfo, PaymentStatus, UserRole,
   SchoolClass, ClassLevel, AddClassPayload, AddCoursePayload, AddClassLevelPayload,
   PaginationMeta, Application, NewsItem, EventItem, GalleryItem, TestimonialItem
