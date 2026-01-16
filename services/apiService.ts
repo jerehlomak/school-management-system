@@ -2,11 +2,13 @@ import {
   User, LoginCredentials, ApiResponse, PaginatedResponse,
   Course, StudentTermGrade, FeePayment, RRRInfo, PaymentStatus, UserRole,
   SchoolClass, ClassLevel, AddClassPayload, AddCoursePayload, AddClassLevelPayload,
-  PaginationMeta, Application, NewsItem, EventItem, GalleryItem
+  PaginationMeta, Application, NewsItem, EventItem, GalleryItem, TestimonialItem
 } from '../types';
 import { generateUniqueAlphaNumericId, generateRandomPassword, generateStudentId } from '../constants'; // Keep utilities
 
-const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'; // Your backend API base URL
+import { API_BASE_URL } from '../config';
+
+const BASE_URL = API_BASE_URL; // Your backend API base URL
 
 // Helper for API calls
 const apiCall = async (endpoint: string, method: string, data?: any) => {
@@ -59,12 +61,36 @@ export const submitApplication = async (formData: FormData): Promise<Application
   return response.json();
 };
 
-export const fetchApplications = async (): Promise<Application[]> => {
-  return apiCall('/applications', 'GET');
+export const fetchApplications = async (page?: number, limit?: number): Promise<any> => {
+  let url = '/applications';
+  if (page) {
+    url += `?page=${page}&limit=${limit || 10}`;
+  }
+  return apiCall(url, 'GET');
 };
 
-export const updateApplicationStatus = async (id: string, status: 'Approved' | 'Rejected' | 'Pending'): Promise<Application> => {
-  return apiCall(`/applications/${id}/status`, 'PATCH', { status });
+export const updateApplicationStatus = async (id: string, status: 'Approved' | 'Rejected', additionalData?: any) => {
+  return apiCall(`/applications/${id}/status`, 'PATCH', { status, ...additionalData });
+};
+
+/* -------------------------------------------------------------------------- */
+/*                                Contact API                                 */
+/* -------------------------------------------------------------------------- */
+
+export const submitContactForm = async (data: any) => {
+  return apiCall('/contact', 'POST', data);
+};
+
+export const fetchContactMessages = async (page?: number, limit?: number) => {
+  let url = '/contact';
+  if (page) {
+    url += `?page=${page}&limit=${limit || 10}`;
+  }
+  return apiCall(url, 'GET');
+};
+
+export const deleteContactMessage = async (id: string) => {
+  return apiCall(`/contact/${id}`, 'DELETE');
 };
 
 /* -------------------------------------------------------------------------- */
@@ -72,26 +98,37 @@ export const updateApplicationStatus = async (id: string, status: 'Approved' | '
 /* -------------------------------------------------------------------------- */
 
 // Generic helper for FormData submission
-const submitFormData = async (url: string, formData: FormData) => {
+const submitFormData = async (url: string, formData: FormData, method: string = 'POST') => {
   const response = await fetch(`${BASE_URL}${url}`, {
-    method: 'POST',
+    method,
     body: formData,
   });
-  if (!response.ok) throw new Error('Failed to submit');
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.message || errorData.error || `Failed to submit: ${response.statusText}`);
+  }
   return response.json();
 };
 
 export const fetchNews = async (): Promise<NewsItem[]> => apiCall('/content/news', 'GET');
 export const createNews = async (data: FormData): Promise<NewsItem> => submitFormData('/content/news', data);
+export const updateNews = async (id: string, data: FormData): Promise<NewsItem> => submitFormData(`/content/news/${id}`, data, 'PUT');
 export const deleteNews = async (id: string) => apiCall(`/content/news/${id}`, 'DELETE');
 
 export const fetchEvents = async (): Promise<EventItem[]> => apiCall('/content/events', 'GET');
 export const createEvent = async (data: FormData): Promise<EventItem> => submitFormData('/content/events', data);
+export const updateEvent = async (id: string, data: FormData): Promise<EventItem> => submitFormData(`/content/events/${id}`, data, 'PUT');
 export const deleteEvent = async (id: string) => apiCall(`/content/events/${id}`, 'DELETE');
 
 export const fetchGallery = async (): Promise<GalleryItem[]> => apiCall('/content/gallery', 'GET');
 export const createGalleryItem = async (data: FormData): Promise<GalleryItem> => submitFormData('/content/gallery', data);
+export const updateGalleryItem = async (id: string, data: FormData): Promise<GalleryItem> => submitFormData(`/content/gallery/${id}`, data, 'PUT');
 export const deleteGalleryItem = async (id: string) => apiCall(`/content/gallery/${id}`, 'DELETE');
+
+export const fetchTestimonials = async (): Promise<TestimonialItem[]> => apiCall('/content/testimonials', 'GET');
+export const createTestimonial = async (data: FormData): Promise<TestimonialItem> => submitFormData('/content/testimonials', data);
+export const updateTestimonial = async (id: string, data: FormData): Promise<TestimonialItem> => submitFormData(`/content/testimonials/${id}`, data, 'PUT');
+export const deleteTestimonial = async (id: string) => apiCall(`/content/testimonials/${id}`, 'DELETE');
 
 
 
@@ -328,6 +365,10 @@ export const fetchAllUsers = async (includePasswords: boolean = false, page: num
  */
 export const updateUser = async (updatedUser: User): Promise<User> => {
   return apiCall(`/users/${encodeURIComponent(updatedUser.id)}`, 'PUT', updatedUser);
+};
+
+export const deleteUser = async (userId: string): Promise<void> => {
+  return apiCall(`/users/${encodeURIComponent(userId)}`, 'DELETE');
 };
 
 /**

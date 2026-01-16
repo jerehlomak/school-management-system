@@ -2,15 +2,26 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Phone, Mail, Send } from 'lucide-react';
 import PublicLayout from '../components/PublicLayout';
+import { submitContactForm } from '../services/apiService';
+import { toast } from 'react-toastify';
 
 const ContactPage: React.FC = () => {
     const [formState, setFormState] = useState({ name: '', email: '', message: '' });
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Placeholder for submission logic
-        alert("Thanks for contacting us! We'll get back to you shortly.");
-        setFormState({ name: '', email: '', message: '' });
+        setLoading(true);
+        try {
+            await submitContactForm(formState);
+            toast.success("Thanks for contacting us! We'll get back to you shortly.");
+            setFormState({ name: '', email: '', message: '' });
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to send message. Please try again.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -131,8 +142,8 @@ const ContactPage: React.FC = () => {
                                         onChange={e => setFormState({ ...formState, message: e.target.value })}
                                     />
                                 </div>
-                                <button type="submit" className="w-full bg-blue-900 text-white font-bold py-4 rounded hover:bg-blue-800 transition-colors flex items-center justify-center">
-                                    <Send className="w-5 h-5 mr-2" /> Send Message
+                                <button type="submit" disabled={loading} className={`w-full bg-blue-900 text-white font-bold py-4 rounded hover:bg-blue-800 transition-colors flex items-center justify-center ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}>
+                                    {loading ? 'Sending...' : <><Send className="w-5 h-5 mr-2" /> Send Message</>}
                                 </button>
                             </form>
                         </div>

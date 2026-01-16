@@ -15,6 +15,12 @@ interface TableProps<T> {
   emptyMessage?: string;
   caption?: string;
   itemsPerPage?: number;
+
+  // Manual Pagination Props
+  manualPagination?: boolean;
+  totalItems?: number;
+  currentPage?: number;
+  onPageChange?: (page: number) => void;
 }
 
 const Table = <T extends Record<string, any>>({
@@ -23,14 +29,24 @@ const Table = <T extends Record<string, any>>({
   rowKey,
   emptyMessage = 'No data available.',
   caption,
-  itemsPerPage = 3, // Default to 3 as requested
-}: TableProps<T>) => {
-  const [currentPage, setCurrentPage] = React.useState(1);
+  itemsPerPage = 10, // Changed default to 10
 
-  // Reset to first page if data changes significantly (optional, but good practice)
+  manualPagination = false,
+  totalItems = 0,
+  currentPage: propPage = 1,
+  onPageChange,
+}: TableProps<T>) => {
+  const [internalPage, setInternalPage] = React.useState(1);
+
+  // Use propPage if manual, otherwise internalPage
+  const currentPage = manualPagination ? propPage : internalPage;
+
+  // Reset internal page if data length changes (only for auto pagination)
   React.useEffect(() => {
-    setCurrentPage(1);
-  }, [data.length]);
+    if (!manualPagination) {
+      setInternalPage(1);
+    }
+  }, [data.length, manualPagination]);
 
   if (!data || data.length === 0) {
     return (
@@ -40,16 +56,37 @@ const Table = <T extends Record<string, any>>({
     );
   }
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  // Calculate Pagination Values
+  const totalCount = manualPagination ? totalItems : data.length;
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
+  // Determine Data to Display
+  // If manual, data is already sliced (the current page data).
+  // If auto, slice data based on internalPage.
+  const currentData = manualPagination
+    ? data
+    : data.slice((internalPage - 1) * itemsPerPage, internalPage * itemsPerPage);
+
+  // Determine start/end indices for "Showing X to Y of Z" text
   const startIndex = (currentPage - 1) * itemsPerPage;
-  const currentData = data.slice(startIndex, startIndex + itemsPerPage);
+  const endIndex = Math.min(startIndex + itemsPerPage, totalCount);
 
   const handlePrev = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
+    const newPage = Math.max(currentPage - 1, 1);
+    if (manualPagination) {
+      onPageChange?.(newPage);
+    } else {
+      setInternalPage(newPage);
+    }
   };
 
   const handleNext = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+    const newPage = Math.min(currentPage + 1, totalPages);
+    if (manualPagination) {
+      onPageChange?.(newPage);
+    } else {
+      setInternalPage(newPage);
+    }
   };
 
   return (
@@ -95,7 +132,7 @@ const Table = <T extends Record<string, any>>({
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-200 bg-gray-50">
           <div className="text-sm text-gray-700">
-            Showing <span className="font-medium">{startIndex + 1}</span> to <span className="font-medium">{Math.min(startIndex + itemsPerPage, data.length)}</span> of <span className="font-medium">{data.length}</span> results
+            Showing <span className="font-medium">{startIndex + 1}</span> to <span className="font-medium">{endIndex}</span> of <span className="font-medium">{totalCount}</span> results
           </div>
           <div className="flex space-x-2">
             <button

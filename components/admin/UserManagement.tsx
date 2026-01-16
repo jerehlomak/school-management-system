@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { User, UserRole, Course, SchoolClass, ClassLevel } from '../../types';
-import { fetchAllUsers, verifyAdminPassword } from '../../services/apiService';
+import { fetchAllUsers, verifyAdminPassword, updateUser, deleteUser } from '../../services/apiService';
 import Table from '../Table';
 import Button from '../Button';
 import Modal from '../Modal';
+import { Pencil, Trash } from 'lucide-react';
 
 interface UserManagementProps {
     currentUser: User;
@@ -24,6 +25,16 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser, classes, c
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
     const [userToReset, setUserToReset] = useState<User | null>(null);
     const [newPassword, setNewPassword] = useState('');
+
+    // --- Delete State ---
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [userToDelete, setUserToDelete] = useState<User | null>(null);
+
+    // --- Edit State ---
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [userToEdit, setUserToEdit] = useState<User | null>(null);
+    const [editForm, setEditForm] = useState<Partial<User>>({});
+
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -82,8 +93,6 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser, classes, c
 
         setLoading(true);
         try {
-            // We can use updateUser from apiService, ensuring we cast to any or filtered type since we're only sending password
-            const { updateUser } = await import('../../services/apiService');
             await updateUser({ ...userToReset, password: newPassword });
 
             setMessage({ type: 'success', text: `Password for ${userToReset.name} updated successfully.` });
@@ -95,6 +104,47 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser, classes, c
         } finally {
             setLoading(false);
         }
+    };
+
+    // --- Delete Handlers ---
+    const handleDeleteClick = (user: User) => {
+        setUserToDelete(user);
+        setIsDeleteModalOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        if (!userToDelete) return;
+        setLoading(true);
+        try {
+            await deleteUser(userToDelete.id);
+            setMessage({ type: 'success', text: 'User deleted successfully' });
+            onRefresh();
+            setIsDeleteModalOpen(false);
+        } catch (err: any) {
+            setMessage({ type: 'error', text: 'Failed to delete user' });
+        } finally { setLoading(false); setUserToDelete(null); }
+    };
+
+    // --- Edit Handlers ---
+    const handleEditClick = (user: User) => {
+        setUserToEdit(user);
+        setEditForm({ ...user }); // Copy all user props to form
+        setIsEditModalOpen(true);
+    };
+
+    const handleUpdateUser = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!userToEdit || !editForm.id) return;
+        setLoading(true);
+        try {
+            await updateUser(editForm as User);
+            setMessage({ type: 'success', text: 'User updated successfully' });
+            onRefresh();
+            setIsEditModalOpen(false);
+            setUserToEdit(null);
+        } catch (err: any) {
+            setMessage({ type: 'error', text: 'Failed to update user' });
+        } finally { setLoading(false); }
     };
 
 
@@ -142,6 +192,14 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser, classes, c
             accessor: (row: User) => (
                 <div className="flex gap-2">
                     <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => handleEditClick(row)}
+                        className="text-xs text-blue-600 bg-blue-50 hover:bg-blue-100"
+                    >
+                        <Pencil className="w-3 h-3 mr-1" /> Edit
+                    </Button>
+                    <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleResetPasswordClick(row)}
@@ -149,12 +207,20 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser, classes, c
                     >
                         Reset PWD
                     </Button>
+                    <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() => handleDeleteClick(row)}
+                        className="text-xs"
+                    >
+                        <Trash className="w-3 h-3" />
+                    </Button>
                     {row.role === UserRole.Student && (
                         <Button
                             variant="secondary"
                             size="sm"
                             onClick={() => handleTransactionsClick(row)}
-                            className="text-xs bg-blue-50 text-blue-600 hover:bg-blue-100 border-blue-200"
+                            className="text-xs bg-purple-50 text-purple-600 hover:bg-purple-100 border-purple-200"
                         >
                             History
                         </Button>
@@ -249,7 +315,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser, classes, c
                 onClose={() => setIsTransactionsModalOpen(false)}
                 title={`Transaction History - ${transactionsUser?.name}`}
                 size="md"
-                footer={<Button onClick={() => setIsTransactionsModalOpen(false)}>Close</Button>}
+                footer={<></>}
             >
                 <div className="space-y-4">
                     {studentTransactions.length === 0 ? (
@@ -275,7 +341,7 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser, classes, c
                                             </td>
                                             <td className="px-3 py-2 text-xs">
                                                 <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold ${tx.status === 'Completed' ? 'bg-green-100 text-green-800' :
-                                                        tx.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                                                    tx.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
                                                     }`}>
                                                     {tx.status}
                                                 </span>
@@ -287,6 +353,59 @@ const UserManagement: React.FC<UserManagementProps> = ({ currentUser, classes, c
                         </div>
                     )}
                 </div>
+            </Modal>
+
+            {/* Edit User Modal */}
+            <Modal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                title={`Edit ${userToEdit?.role}`}
+                footer={
+                    <>
+                        <Button variant="primary" onClick={handleUpdateUser} loading={loading}>Save Changes</Button>
+                    </>
+                }
+            >
+                {userToEdit && (
+                    <form onSubmit={handleUpdateUser} className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Name</label>
+                            <input type="text" className="w-full border p-2 rounded"
+                                value={editForm.name || ''} onChange={e => setEditForm({ ...editForm, name: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Email</label>
+                            <input type="email" className="w-full border p-2 rounded"
+                                value={editForm.email || ''} onChange={e => setEditForm({ ...editForm, email: e.target.value })} />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                            <input type="text" className="w-full border p-2 rounded"
+                                value={editForm.phoneNumber || ''} onChange={e => setEditForm({ ...editForm, phoneNumber: e.target.value })} />
+                        </div>
+                        {userToEdit.role === UserRole.Student && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Class</label>
+                                <select className="w-full border p-2 rounded"
+                                    value={editForm.classId || ''} onChange={e => setEditForm({ ...editForm, classId: e.target.value })}>
+                                    <option value="">Select Class</option>
+                                    {classes.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                                </select>
+                            </div>
+                        )}
+                    </form>
+                )}
+            </Modal>
+
+            {/* Delete User Modal */}
+            <Modal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                title="Delete User"
+                footer={<Button variant="danger" onClick={confirmDelete} loading={loading}>Delete User</Button>}
+            >
+                <p>Are you sure you want to delete <b>{userToDelete?.name}</b>?</p>
+                <p className="text-sm text-red-600 mt-2">This action is permanent and may affect linked data (e.g. grades, payments).</p>
             </Modal>
         </div>
     );

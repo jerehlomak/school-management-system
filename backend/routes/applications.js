@@ -84,6 +84,19 @@ router.post('/',
             });
 
             const savedApp = await newApplication.save();
+
+            // Notify Admin
+            const emailService = require('../services/emailService');
+            try {
+                const adminEmail = process.env.SCHOOL_EMAIL;
+                if (adminEmail) {
+                    await emailService.sendAdminApplicationNotification(adminEmail, savedApp);
+                }
+            } catch (notifyErr) {
+                console.error('Failed to send admin notification:', notifyErr);
+                // Don't fail the response
+            }
+
             res.status(201).json(savedApp);
 
         } catch (err) {
@@ -95,8 +108,23 @@ router.post('/',
 // GET /api/applications - Get all applications (Admin only)
 router.get('/', async (req, res) => {
     try {
-        const applications = await Application.find().sort({ submissionDate: -1 });
-        res.json(applications);
+        const page = parseInt(req.query.page);
+        const limit = parseInt(req.query.limit) || 10;
+
+        if (page) {
+            const skip = (page - 1) * limit;
+            const total = await Application.countDocuments();
+            const applications = await Application.find().sort({ submissionDate: -1 }).skip(skip).limit(limit);
+            res.json({
+                data: applications,
+                total,
+                page,
+                totalPages: Math.ceil(total / limit)
+            });
+        } else {
+            const applications = await Application.find().sort({ submissionDate: -1 });
+            res.json(applications);
+        }
     } catch (err) {
         res.status(500).json({ message: 'Failed to fetch applications' });
     }
@@ -105,14 +133,25 @@ router.get('/', async (req, res) => {
 // PATCH /api/applications/:id/status - Update status
 router.patch('/:id/status', async (req, res) => {
     try {
-        const { status } = req.body;
+        const { status, interviewDate } = req.body;
+
         if (!['Pending', 'Approved', 'Rejected'].includes(status)) {
             return res.status(400).json({ message: 'Invalid status' });
         }
 
+        // Validate Interview Date if Approving
+        if (status === 'Approved' && !interviewDate) {
+            return res.status(400).json({ message: 'Interview date is required for approval.' });
+        }
+
+        const updateData = { status };
+        if (status === 'Approved') {
+            updateData.interviewDate = interviewDate;
+        }
+
         const updatedApp = await Application.findByIdAndUpdate(
             req.params.id,
-            { status },
+            updateData,
             { new: true }
         );
 
@@ -120,8 +159,29 @@ router.patch('/:id/status', async (req, res) => {
             return res.status(404).json({ message: 'Application not found' });
         }
 
+        // Send Email Notification
+        if (status === 'Approved') {
+            const emailService = require('../services/emailService');
+            // We use 'await' here to ensure email is sent? Or fire and forget?
+            // Safer to await to catch errors, but might slow response.
+            // Let's await but wrap in try/catch specifically for email so it doesn't fail the request if email fails (or maybe it should?).
+            // For now, let's log error but not fail request, as status is already updated.
+            try {
+                await emailService.sendApplicationApprovalEmail(
+                    updatedApp.parentEmail,
+                    `${updatedApp.firstName} ${updatedApp.lastName}`,
+                    updatedApp.interviewDate,
+                    updatedApp.parentName
+                );
+            } catch (emailErr) {
+                console.error('Failed to send approval email:', emailErr);
+                // Can return a warning in response?
+            }
+        }
+
         res.json(updatedApp);
     } catch (err) {
+        console.error('Update status error:', err);
         res.status(500).json({ message: 'Failed to update status' });
     }
 });

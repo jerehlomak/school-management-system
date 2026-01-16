@@ -3,21 +3,13 @@ import { motion } from 'framer-motion';
 import { Send, User, Users, BookOpen, Upload } from 'lucide-react';
 import PublicLayout from '../components/PublicLayout';
 import { submitApplication } from '../services/apiService';
+import { toast } from 'react-toastify';
 
 const ApplicationPage: React.FC = () => {
+    // ... existing initial state ...
     const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        middleName: '',
-        dob: '',
-        gender: '',
-        grade: '',
-        parentName: '',
-        parentEmail: '',
-        parentPhone: '',
-        address: '',
-        prevSchool: '',
-        medicalInfo: ''
+        firstName: '', lastName: '', middleName: '', dob: '', gender: '', grade: '',
+        parentName: '', parentEmail: '', parentPhone: '', address: '', prevSchool: '', medicalInfo: ''
     });
     // State for files
     const [passport, setPassport] = useState<File | null>(null);
@@ -27,6 +19,8 @@ const ApplicationPage: React.FC = () => {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // ... handlers ...
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -40,7 +34,6 @@ const ApplicationPage: React.FC = () => {
 
     const handleDocumentsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
-            // Convert FileList to Array
             setDocuments(Array.from(e.target.files));
         }
     };
@@ -52,26 +45,27 @@ const ApplicationPage: React.FC = () => {
 
         try {
             const data = new FormData();
-            // Append Text Fields
             Object.keys(formData).forEach(key => {
                 data.append(key, (formData as any)[key]);
             });
 
-            // Append Files
             if (passport) {
                 data.append('passport', passport);
             }
-            // Append Documents (Multer handles multiple with same fieldname)
             documents.forEach((doc) => {
                 data.append('documents', doc);
             });
 
             await submitApplication(data);
             setSuccess(true);
-            // Optional: reset form here
+            await submitApplication(data);
+            setSuccess(true);
+            toast.success("Application submitted successfully!");
         } catch (err: any) {
             console.error(err);
-            setError(err.message || "Failed to submit application.");
+            const msg = err.message || "Failed to submit application.";
+            setError(msg);
+            toast.error(msg);
         } finally {
             setLoading(false);
         }
@@ -87,7 +81,7 @@ const ApplicationPage: React.FC = () => {
                         </div>
                         <h2 className="text-3xl font-bold text-gray-900 mb-4">Application Received!</h2>
                         <p className="text-gray-600 mb-8">
-                            Thank you for applying to COCIN Danbong. We have received your details and will contact you shortly via email regarding the next steps.
+                            Thank you for applying to COCIN Danbong. We have received your details. Please expect an email from us regarding your application status and next steps within 5 working days.
                         </p>
                         <button onClick={() => window.location.reload()} className="text-blue-600 hover:text-blue-800 font-semibold">
                             Submit Another Application
@@ -101,7 +95,7 @@ const ApplicationPage: React.FC = () => {
     return (
         <PublicLayout transparentNavbar={false}>
             {/* Header */}
-            <section className="bg-blue-900 py-20 text-white text-center">
+            <section className="bg-blue-900 pt-28 pb-10 text-white text-center">
                 <div className="container mx-auto px-6">
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}

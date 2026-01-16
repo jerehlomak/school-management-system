@@ -49,10 +49,21 @@ app.use('/api/class-levels', require('./routes/classLevels.js'));
 app.use('/api/upload', require('./routes/upload.js'));
 app.use('/api/applications', require('./routes/applications.js'));
 app.use('/api/content', require('./routes/content.js'));
+app.use('/api/contact', require('./routes/contact.js'));
 
 // Basic route for testing server
 app.get('/', (req, res) => {
   res.send('Edves Portal Backend API is running!');
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+  res.status(500).json({
+    message: 'Internal Server Error',
+    error: err.message,
+    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined
+  });
 });
 
 // Start the server

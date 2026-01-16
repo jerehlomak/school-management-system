@@ -32,6 +32,7 @@ const GalleryPage = lazy(() => import('./pages/GalleryPage'));
 const ApplicationPage = lazy(() => import('./pages/ApplicationPage'));
 const AdminApplicationsPage = lazy(() => import('./pages/AdminApplicationsPage'));
 const AdminContentPage = lazy(() => import('./pages/AdminContentPage'));
+const AdminMessagesPage = lazy(() => import('./pages/AdminMessagesPage'));
 
 // Simple Admin Route Protection
 const AdminRoute = ({ children }: { children: React.ReactElement }) => {
@@ -137,6 +138,7 @@ const AppContent: React.FC = () => {
           <Route path="/admin/payments" element={<AdminRoute><AdminPaymentsPage /></AdminRoute>} />
           <Route path="/admin/applications" element={<AdminRoute><AdminApplicationsPage /></AdminRoute>} />
           <Route path="/admin/content" element={<AdminRoute><AdminContentPage /></AdminRoute>} />
+          <Route path="/admin/messages" element={<AdminRoute><AdminMessagesPage /></AdminRoute>} />
 
           {/* Teacher Routes */}
           <Route path="/teacher/classes" element={<TeacherClassesPage user={currentUser} />} />
@@ -172,12 +174,16 @@ const AppContent: React.FC = () => {
   );
 };
 
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 const App: React.FC = () => {
   return (
     <Router>
       <Suspense fallback={<LoadingSpinner />}>
         <AppContent />
       </Suspense>
+      <ToastContainer position="top-right" autoClose={5000} />
     </Router>
   );
 };

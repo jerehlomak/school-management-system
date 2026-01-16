@@ -1,40 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const path = require('path');
 const fs = require('fs');
 
-// Configure Multer Storage
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        const uploadDir = 'uploads/';
-        // Create directory if it doesn't exist
-        if (!fs.existsSync(uploadDir)) {
-            fs.mkdirSync(uploadDir, { recursive: true });
-        }
-        cb(null, uploadDir);
+// Cloudinary Config
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+const storage = new CloudinaryStorage({
+    cloudinary: cloudinary,
+    params: {
+        folder: 'edves_uploads',
+        allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
     },
-    filename: function (req, file, cb) {
-        // Generate unique filename: fieldname-timestamp-random.ext
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
 });
 
-// File Filter (Optional: simpler validation)
-const fileFilter = (req, file, cb) => {
-    // Accept images only
-    if (!file.originalname.match(/\.(jpg|jpeg|png|gif|webp)$/)) {
-        return cb(new Error('Only image files are allowed!'), false);
-    }
-    cb(null, true);
-};
-
-const upload = multer({
-    storage: storage,
-    fileFilter: fileFilter,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
-});
+const upload = multer({ storage: storage });
 
 // POST /api/upload
 router.post('/', upload.single('image'), (req, res) => {
@@ -42,21 +29,9 @@ router.post('/', upload.single('image'), (req, res) => {
         return res.status(400).json({ message: 'No file uploaded' });
     }
 
-    // Construct URL. Assuming server runs on localhost:5000 or similar.
-    // In production, you might want a full URL or relative path handled by frontend.
-    // Here we return a relative path that the frontend uses with the API base URL.
-    // OR just return the static path like /uploads/filename.
-
-    // Note: frontend needs to prepend backend URL or we prepend it here if we know the host.
-    // Safest is to return the relative path that express.static serves.
-
-    const protocol = req.protocol;
-    const host = req.get('host');
-    const fullUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
-
     res.json({
         message: 'File uploaded successfully',
-        url: fullUrl,
+        url: req.file.path,
         filename: req.file.filename
     });
 });

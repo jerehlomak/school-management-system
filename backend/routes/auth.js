@@ -89,15 +89,17 @@ router.post('/forgot-password', async (req, res) => {
     user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
     await user.save();
 
-    // Mock sending email
-    console.log(`---------------------------------------------------`);
-    console.log(`To: ${user.email}`);
-    console.log(`Subject: Password Reset Request`);
-    console.log(`Token: ${token}`);
-    console.log(`Link: http://localhost:3000/#/reset-password?token=${token}`);
-    console.log(`---------------------------------------------------`);
+    // Send Email
+    const emailService = require('../services/emailService');
+    const resetLink = `http://localhost:3000/#/reset-password?token=${token}`;
 
-    res.json({ message: 'Password reset link sent to your email.' });
+    try {
+      await emailService.sendPasswordResetEmail(user.email, resetLink, user.name);
+      res.json({ message: 'Password reset link sent to your email.' });
+    } catch (emailErr) {
+      console.error('Failed to send reset email:', emailErr);
+      res.status(500).json({ message: 'Failed to send reset email. Please try again.' });
+    }
   } catch (error) {
     console.error('Forgot Password error:', error);
     res.status(500).json({ message: 'Server error' });

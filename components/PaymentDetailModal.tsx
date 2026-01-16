@@ -51,16 +51,13 @@ const PaymentDetailModal: React.FC<PaymentDetailModalProps> = ({ isOpen, onClose
             title="Payment Details"
             size="md"
             footer={
-                <div className="flex justify-end gap-2">
-                    <Button variant="secondary" onClick={onClose} disabled={loading}>
-                        Close
-                    </Button>
+                <>
                     {canConfirm && (
                         <Button variant="primary" onClick={handleConfirmPayment} loading={loading}>
                             Confirm Payment
                         </Button>
                     )}
-                </div>
+                </>
             }
         >
             <div className="space-y-4">

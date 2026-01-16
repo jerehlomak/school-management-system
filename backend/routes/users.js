@@ -120,6 +120,37 @@ router.put('/:id', async (req, res) => {
     res.status(500).json({ message: 'Server error updating user' });
   }
 });
+// DELETE /api/users/:id - Delete a user
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await User.findOneAndDelete({ id });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Cleanup related data
+    if (user.role === 'student') {
+      // Remove from Parent
+      if (user.parentId) {
+        await User.updateOne({ id: user.parentId }, { $pull: { studentIds: user.id } });
+      }
+      // Remove from Courses
+      await Course.updateMany({ students: user.id }, { $pull: { students: user.id } });
+    } else if (user.role === 'teacher') {
+      // Unassign from Courses
+      await Course.updateMany({ teacherId: user.id }, { $unset: { teacherId: "" } });
+    } else if (user.role === 'parent') {
+      // Unlink Students
+      await User.updateMany({ parentId: user.id }, { $unset: { parentId: "" } });
+    }
+
+    res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting user:', error);
+    res.status(500).json({ message: 'Server error deleting user' });
+  }
+});
 
 // POST /api/users/register-student
 router.post('/register-student', async (req, res) => {
