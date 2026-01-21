@@ -33,6 +33,7 @@ const ApplicationPage = lazy(() => import('./pages/ApplicationPage'));
 const AdminApplicationsPage = lazy(() => import('./pages/AdminApplicationsPage'));
 const AdminContentPage = lazy(() => import('./pages/AdminContentPage'));
 const AdminMessagesPage = lazy(() => import('./pages/AdminMessagesPage'));
+const TimetablePage = lazy(() => import('./pages/admin/TimetablePage'));
 
 // Simple Admin Route Protection
 const AdminRoute = ({ children }: { children: React.ReactElement }) => {
@@ -139,6 +140,7 @@ const AppContent: React.FC = () => {
           <Route path="/admin/applications" element={<AdminRoute><AdminApplicationsPage /></AdminRoute>} />
           <Route path="/admin/content" element={<AdminRoute><AdminContentPage /></AdminRoute>} />
           <Route path="/admin/messages" element={<AdminRoute><AdminMessagesPage /></AdminRoute>} />
+          <Route path="/admin/timetable" element={<AdminRoute><TimetablePage /></AdminRoute>} />
 
           {/* Teacher Routes */}
           <Route path="/teacher/classes" element={<TeacherClassesPage user={currentUser} />} />

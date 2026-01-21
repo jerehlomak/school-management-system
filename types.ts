@@ -206,3 +206,24 @@ export interface TestimonialItem {
   image?: string;
   createdAt: string;
 }
+
+export interface TimetableEntry {
+  day: string; // "Monday", "Tuesday", etc.
+  period: number; // 1, 2, 3...
+  startTime: string; // "08:00"
+  endTime: string; // "08:40"
+  subjectId: string;
+  teacherId: string;
+  roomId?: string;
+  type: 'Lesson' | 'Break';
+}
+
+export interface Timetable {
+  _id: string;
+  classId: string;
+  term: number;
+  year: number;
+  entries: TimetableEntry[];
+  createdAt: string;
+}
+

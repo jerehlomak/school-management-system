@@ -50,6 +50,7 @@ app.use('/api/upload', require('./routes/upload.js'));
 app.use('/api/applications', require('./routes/applications.js'));
 app.use('/api/content', require('./routes/content.js'));
 app.use('/api/contact', require('./routes/contact.js'));
+app.use('/api/timetable', require('./routes/timetableRoutes.js'));
 
 // Basic route for testing server
 app.get('/', (req, res) => {

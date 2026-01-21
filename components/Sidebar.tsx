@@ -62,6 +62,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, isOpen, onClose }) => {
           { path: '/admin/payments', label: 'Payments', icon: CreditCard },
           { path: '/admin/applications', label: 'Applications', icon: FileText },
           { path: '/admin/content', label: 'CMS (News/Gallery)', icon: FileText },
+          { path: '/admin/timetable', label: 'Timetable', icon: BookOpen },
           { path: '/admin/messages', label: 'Messages', icon: MessageSquare },
           // { path: '/admin/reports', label: 'Reports', icon: FileText },
         ];
@@ -110,7 +111,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, isOpen, onClose }) => {
           </button>
         </div>
 
-        <nav className="mt-4 flex-1 px-2">
+        <nav className="mt-4 flex-1 px-2 overflow-y-auto scrollbar-thin scrollbar-thumb-blue-700 scrollbar-track-transparent">
           <ul className="space-y-2">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.path;
